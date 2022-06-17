@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<robot name="moveo">
+
+  <material name="white">
+    <color rgba="1 1 1 1"/>
+  </material>
+
+<!--Links-->
+
+  <link name="base_link">
+    <visual>
+      <origin rpy="1.571 0 3.142" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://moveo_ps3/meshes/base_link.STL"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <link name="link_1">
+    <visual>
+      <origin rpy="1.571 0 3.142" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://moveo_ps3/meshes/link_1.STL"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <link name="link_2">
+    <visual>
+      <origin rpy="1.571 0 3.142" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://moveo_ps3/meshes/link_2.STL"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <link name="link_3">
+    <visual>
+      <origin rpy="1.571 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://moveo_ps3/meshes/link_3.STL"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <link name="link_4">
+    <visual>
+      <origin rpy="1.571 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://moveo_ps3/meshes/link_4.STL"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <link name="link_5">
+    <visual>
+      <origin rpy="1.571 0 3.142" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://moveo_ps3/meshes/link_5.STL"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <link name="end_effector"></link>
+
+<!--Joints-->
+
+  <joint name="joint_1" type="revolute">
+    <parent link="base_link"/>
+    <child link="link_1"/>
+    <limit effort="0" lower="-1.571" upper="1.571" velocity="0"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0"/>
+  </joint>
+
+  <joint name="joint_2" type="revolute">
+    <parent link="link_1"/>
+    <child link="link_2"/>
+    <limit effort="0" lower="-1.571" upper="1.571" velocity="0"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0.1665"/>
+  </joint>
+
+  <joint name="joint_3" type="revolute">
+    <parent link="link_2"/>
+    <child link="link_3"/>
+    <limit effort="0" lower="-1.571" upper="1.571" velocity="0"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0.2211"/>
+  </joint>
+
+  <joint name="joint_4" type="revolute">
+    <parent link="link_3"/>
+    <child link="link_4"/>
+    <limit effort="0" lower="-1.571" upper="1.571" velocity="0"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0.1275"/>
+  </joint>
+
+  <joint name="joint_5" type="revolute">
+    <parent link="link_4"/>
+    <child link="link_5"/>
+    <limit effort="0" lower="-1.571" upper="1.571" velocity="0"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0.0955"/>
+  </joint>
+
+  <joint name="end_point" type="fixed">
+    <parent link="link_5"/>
+    <child link="end_effector"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0.145"/>
+  </joint>
+
+</robot>
