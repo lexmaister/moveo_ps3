@@ -2,7 +2,7 @@
 
   <arg name="model" default="$(find moveo_ps3)/urdf/moveo_ps3_end_effector.urdf"/>
   <arg name="gui" default="true" />
-  <arg name="rvizconfig" default="$(find moveo_ps3)/rviz/urdf.rviz" />
+  <arg name="rvizconfig" default="$(find moveo_ps3)/rviz/urdf_end_effector.rviz" />
 
   <param name="robot_description" command="cat $(find moveo_ps3)/urdf/moveo_ps3_end_effector.urdf" />
   <param name="use_gui" value="$(arg gui)"/>
