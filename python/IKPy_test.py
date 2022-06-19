@@ -48,7 +48,7 @@ class MoveoIKPy:
             # calc
             if self.joy_active:
                 self.calc_IK()
-            self.calc_pos_error()
+                self.calc_pos_error()
             # publish
             self.pub_target_axis()
             self.pub_target_marker()
