@@ -19,6 +19,7 @@ class MoveoIKPy:
     Publisher:
         * /joint_states
         * /geometry_msgs/PoseStamped
+        * /visualization_marker
     '''
 
     def __init__(self, urdf) -> None:
