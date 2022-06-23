@@ -1,9 +1,5 @@
 Header  header
-float32 pos_x
-float32 pos_y
-float32 pos_z
-float32 roll
-float32 pitch
-float32 yaw
+geometry_msgs/Vector3 position
+geometry_msgs/Vector3 orientation
 bool    active
 bool    calc_orient
