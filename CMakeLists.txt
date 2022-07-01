@@ -162,6 +162,8 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   python/IKPy_test.py
+  python/MoveoIKPy.py
+  python/PS3Handler.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
