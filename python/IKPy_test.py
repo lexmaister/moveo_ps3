@@ -24,13 +24,13 @@ class MoveoIKPy:
 
     def __init__(self, urdf) -> None:
         # x, y, z - meters
-        self.target_position    = [0.1, 0.3, 0.6]
+        self.target_position    = [0, 0.3, 0.6]
         self.position_error     = 0.0
         # r, p, y - degrees     
         self.target_orientation = [-30, 0, 0]
         self.orientation_error  = 0.0 
         self.joint_angles       = [0, 0, 0, 0, 0]
-        self.joy_active         = True
+        self.active         = True
         self.calc_orientation   = True
         self.chain = ikpy.chain.Chain.from_urdf_file(urdf, base_elements = ['base_link'])
         # full 7 chain links (aka urdf joints)
@@ -46,7 +46,7 @@ class MoveoIKPy:
             #subscribe
 
             # calc
-            if self.joy_active:
+            if self.active:
                 self.calc_IK()
                 self.calc_pos_error()
             # publish
