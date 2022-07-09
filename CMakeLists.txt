@@ -51,7 +51,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  MoveTarget.msg
+  PS3State.msg
+  TargetPose.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -161,9 +162,9 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  python/IKPy_test.py
-  python/MoveoIKPy.py
-  python/PS3Handler.py
+  python/ps3_handler.py
+  python/target_positioner.py
+  python/target_tf2_publisher.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

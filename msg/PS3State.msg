@@ -1,0 +1,9 @@
+Header  header
+float32[] change_position
+float32[] change_orientation
+float32[] speed
+bool[]  reset
+bool    calc_active
+bool    calc_orient
+bool    move
+bool    gripper

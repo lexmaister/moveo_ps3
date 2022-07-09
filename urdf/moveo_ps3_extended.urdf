@@ -7,6 +7,8 @@
 
 <!--Links-->
 
+  <link name="world"></link>
+
   <link name="base_link">
     <visual>
       <origin rpy="1.571 0 3.142" xyz="0 0 0"/>
@@ -70,6 +72,13 @@
   <link name="end_effector"></link>
 
 <!--Joints-->
+
+  <joint name="world" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0.129"/>
+  </joint>
 
   <joint name="joint_1" type="revolute">
     <parent link="base_link"/>
