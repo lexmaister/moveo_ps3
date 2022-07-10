@@ -29,7 +29,7 @@ class TargetPositioner:
 
     def reset_pose(self, pos: bool=False, orient: bool=False) -> None:
         '''Reset target position or/and orientation'''
-        if pos:    self.position    = [0., 0., 0.8846]
+        if pos:    self.position    = [0., -0.22, 0.7956]
         if orient: self.orientation = [0., 0., 0.]
         
     def ps3_state_callback(self, msg) -> None:

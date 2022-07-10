@@ -77,7 +77,7 @@
     <parent link="world"/>
     <child link="base_link"/>
     <axis xyz="0 0 1"/>
-    <origin xyz="0 0 0.129"/>
+    <origin xyz="0 -0.22 0.040"/>
   </joint>
 
   <joint name="joint_1" type="revolute">

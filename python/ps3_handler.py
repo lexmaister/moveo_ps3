@@ -87,7 +87,7 @@ class PS3Handler:
         self.out_msg_seq += 1
         msg.header.seq      = self.out_msg_seq
         msg.header.stamp    = rospy.Time.now()
-        msg.header.frame_id = '/world'
+        msg.header.frame_id = 'world'
         msg.change_position    = self.change_position[:]
         msg.change_orientation = self.change_orientation[:]
         msg.speed           = self.speed[:]
