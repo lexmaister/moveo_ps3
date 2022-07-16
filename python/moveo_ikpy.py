@@ -10,7 +10,6 @@ import tf_conversions
 import tf2_ros
 
 
-
 class MoveoIKPy:
     '''Class for calculating inverse kinematics of Moveo manipulator with IKPy, works in loop mode
 
