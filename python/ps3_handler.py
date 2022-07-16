@@ -116,6 +116,6 @@ class PS3Handler:
 
 if __name__ == '__main__':
     try:
-        ps3_handler = PS3Handler()
+        PS3Handler()
     except rospy.ROSInterruptException as err:
         rospy.logerr(str(err))
