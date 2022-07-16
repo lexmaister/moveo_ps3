@@ -58,9 +58,9 @@ class MoveoIKPy:
                                         target_tf.transform.rotation.y,
                                         target_tf.transform.rotation.z,
                                         target_tf.transform.rotation.w)
-                rospy.loginfo(f'tf /{self.base_frame} /target:' + 
-                              f'\ntranslation: {self.target_position}' +
-                              f'\nrotation: {self.target_rotation}' )
+                rospy.logdebug( f'tf /{self.base_frame} /target:' + 
+                                f'\ntranslation: {self.target_position}' +
+                                f'\nrotation quaternion: {self.target_rotation}' )
             except (tf2_ros.LookupException, 
                     tf2_ros.ConnectivityException, 
                     tf2_ros.ExtrapolationException,
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     # https://answers.ros.org/question/384669/use-arguments-from-roslaunch-in-python/?answer=384696
     urdf_file = rospy.get_param('/moveo_ikpy/model') 
     try:
-        moveo_ik_pub = MoveoIKPy(urdf_file)
+        MoveoIKPy(urdf_file)
     except rospy.ROSInterruptException as err:
         rospy.logerr(str(err))
     
