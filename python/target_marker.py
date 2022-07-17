@@ -10,9 +10,6 @@ import tf_conversions
 import tf2_ros
 
 
-
-
-
 class TargetMarker:
     '''
     Class for publishing target visualisation marker depending transform error /target vs /end_effector, 
