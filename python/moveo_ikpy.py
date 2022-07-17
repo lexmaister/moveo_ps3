@@ -10,6 +10,25 @@ import tf_conversions
 import tf2_ros
 
 
+def log_show_transform(tf, base_frame: str, moving_frame: str, axs:str = 'sxyz', log_lvl:int = rospy.INFO):
+    '''Show transform data in /rosout'''
+    target_position = ( tf.transform.translation.x,
+                        tf.transform.translation.y,
+                        tf.transform.translation.z)
+    target_rotation = ( tf.transform.rotation.x,
+                        tf.transform.rotation.y,
+                        tf.transform.rotation.z,
+                        tf.transform.rotation.w)
+    euler = tf_conversions.transformations.euler_from_quaternion(target_rotation, axes=axs)
+    tf_str =    f'tf /{base_frame} /{moving_frame}:'\
+                f'\ntranslation, m: {np.round(target_position, 3)}'\
+                f'\nrotation - euler({axs}), deg): {np.round(np.degrees(euler), 1)}'
+    if log_lvl == rospy.INFO:
+        rospy.loginfo(tf_str)
+    elif log_lvl == rospy.DEBUG:
+        rospy.logdebug(tf_str)
+
+
 class MoveoIKPy:
     '''Class for calculating inverse kinematics of Moveo manipulator with IKPy, works in loop mode
 
@@ -42,7 +61,7 @@ class MoveoIKPy:
         rospy.init_node('moveo_ikpy', log_level=rospy.INFO)
 
         tf_buffer   = tf2_ros.Buffer()
-        tf_listener = tf2_ros.TransformListener(tf_buffer)
+        tf2_ros.TransformListener(tf_buffer)
 
         rate = rospy.Rate(10) #10 Hz
         while not rospy.is_shutdown():
@@ -57,9 +76,7 @@ class MoveoIKPy:
                                         target_tf.transform.rotation.y,
                                         target_tf.transform.rotation.z,
                                         target_tf.transform.rotation.w)
-                rospy.logdebug( f'tf /{self.base_frame} /target:' + 
-                                f'\ntranslation: {self.target_position}' +
-                                f'\nrotation quaternion: {self.target_rotation}' )
+                log_show_transform(target_tf, self.base_frame, 'target', axs='rxyz', log_lvl=rospy.DEBUG)
             except (tf2_ros.LookupException, 
                     tf2_ros.ConnectivityException, 
                     tf2_ros.ExtrapolationException,
