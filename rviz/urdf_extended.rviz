@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /RobotModel1/Links1
+        - /TF1
         - /Axes1
         - /Marker1
       Splitter Ratio: 0.5
@@ -135,7 +136,7 @@ Visualization Manager:
       Marker Alpha: 1
       Marker Scale: 0.5
       Name: TF
-      Show Arrows: true
+      Show Arrows: false
       Show Axes: true
       Show Names: true
       Tree:
@@ -233,5 +234,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1579
-  X: 146
+  X: 145
   Y: 25
