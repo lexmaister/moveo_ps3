@@ -7,14 +7,15 @@
     <param name="robot_description" command="cat $(find moveo_ps3)/urdf/moveo_ps3_extended.urdf" />
     <param name="use_gui" value="$(arg gui)"/>
 
-    <node name="joy" pkg="joy" type="joy_node"/>
-    <node name="ps3_handler" pkg="moveo_ps3" type="ps3_handler.py" output="screen" />
-    <node name="target_positioner" pkg="moveo_ps3" type="target_positioner.py" output="screen" />
-    <node name="target_tf2_publisher" pkg="moveo_ps3" type="target_tf2_publisher.py" output="screen"/>
-    <node name="moveo_ikpy" pkg="moveo_ps3" type="moveo_ikpy.py" output="screen">
+    <node name="joy"                    pkg="joy"       type="joy_node"/>
+    <node name="ps3_handler"            pkg="moveo_ps3" type="ps3_handler.py" output="screen" />
+    <node name="target_positioner"      pkg="moveo_ps3" type="target_positioner.py" output="screen" />
+    <node name="target_tf2_publisher"   pkg="moveo_ps3" type="target_tf2_publisher.py" output="screen"/>
+    <node name="target_marker"          pkg="moveo_ps3" type="target_marker.py" output="screen"/>    
+    <node name="moveo_ikpy"             pkg="moveo_ps3" type="moveo_ikpy.py" output="screen">
         <param name="model" value="$(arg model)" />
     </node> 
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+    <node name="robot_state_publisher"  pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="rviz"                   pkg="rviz"      type="rviz" args="-d $(arg rvizconfig)" required="true" />
 
 </launch>
