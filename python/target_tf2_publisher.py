@@ -20,7 +20,6 @@ from moveo_ps3.msg import TargetPose
 def handle_target_state(msg):
     pub = tf2_ros.TransformBroadcaster()
     tf = geometry_msgs.msg.TransformStamped()
-
     tf.header.stamp = rospy.Time.now()
     tf.header.frame_id = msg.header.frame_id
     tf.child_frame_id  = '/target'
@@ -36,7 +35,6 @@ def handle_target_state(msg):
     tf.transform.rotation.y = q[1]
     tf.transform.rotation.z = q[2]
     tf.transform.rotation.w = q[3]
-
     pub.sendTransform(tf)
 
 if __name__ == '__main__':

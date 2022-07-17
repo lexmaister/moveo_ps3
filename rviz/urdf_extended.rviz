@@ -138,7 +138,7 @@ Visualization Manager:
       Name: TF
       Show Arrows: false
       Show Axes: true
-      Show Names: true
+      Show Names: false
       Tree:
         world:
           base_link:
@@ -167,7 +167,7 @@ Visualization Manager:
       Marker Topic: visualization_marker
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -234,5 +234,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1579
-  X: 145
+  X: 144
   Y: 25

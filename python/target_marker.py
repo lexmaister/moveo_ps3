@@ -1,119 +1,130 @@
 #!/usr/bin/env python3
 
 import rospy
-from sensor_msgs.msg import JointState
 from std_msgs.msg import Header
-import ikpy.chain, ikpy.urdf
-import numpy as np
+from visualization_msgs.msg import Marker
 from moveo_ps3.msg import PS3State
+from moveo_ikpy import log_show_transform
+import numpy as np
 import tf_conversions
 import tf2_ros
 
 
 
-class MoveoIKPy:
-    '''Class for calculating inverse kinematics of Moveo manipulator with IKPy, works in loop mode
+
+
+class TargetMarker:
+    '''
+    Class for publishing target visualisation marker depending transform error /target vs /end_effector, 
+    works in spin mode
 
     Subscriber:
-        * /ps3_state
         * /tf
-    
-    Publisher:
-        * /joint_states
-    '''
+        * /ps3_state
 
-    def __init__(self, urdf) -> None:
-        # target pose from tf
-        self.target_position    = (0, 0, 0)   
-        self.target_rotation    = (0, 0, 0, 0) # quaternion
-        self.joint_angles       = (0, 0, 0, 0, 0)
+    Publisher:
+        * /visualization_marker
+    '''
+    def __init__(self) -> None:
+        self.pos_error          = 0
+        self.orient_error       = 0
+        self.max_pos_error      = 0.005 # 5 mm
+        self.max_orient_error   = 0.5   # 0.5 degree
         self.calc_active        = True
         self.calc_orient        = True
         self.base_frame         = ''
-        self.chain = ikpy.chain.Chain.from_urdf_file(urdf, base_elements = ['world'])
-        # full 8 chain links (aka urdf joints)
-        self.chain_links        = []
-        # track ps3 messages counter 
-        self.ps3_msg_seq        = 0
+        self.gripper            = False
         # start node
+        self.tf_buffer          = tf2_ros.Buffer()
         self.run()
-        
-    def run(self) -> None:
-        '''Start running node "moveo_ikpy"'''
-        rospy.init_node('moveo_ikpy', log_level=rospy.INFO)
 
-        tf_buffer   = tf2_ros.Buffer()
-        tf_listener = tf2_ros.TransformListener(tf_buffer)
+    def run(self):
+        '''Start running node'''
+        rospy.init_node('target_marker', log_level=rospy.INFO)
+        tf2_ros.TransformListener(self.tf_buffer)
+        rospy.Subscriber('ps3_state', PS3State, self.handle_ps3_state, queue_size=1)
+        rospy.spin()
 
-        rate = rospy.Rate(10) #10 Hz
-        while not rospy.is_shutdown():
-            #subscribe
-            rospy.Subscriber('ps3_state', PS3State, self.ps3_state_callback, queue_size=1)
-            try:
-                target_tf = tf_buffer.lookup_transform(self.base_frame, 'target', rospy.Time())
-                self.target_position = (target_tf.transform.translation.x,
-                                        target_tf.transform.translation.y,
-                                        target_tf.transform.translation.z)
-                self.target_rotation = (target_tf.transform.rotation.x,
-                                        target_tf.transform.rotation.y,
-                                        target_tf.transform.rotation.z,
-                                        target_tf.transform.rotation.w)
-                rospy.loginfo(f'tf /{self.base_frame} /target:' + 
-                              f'\ntranslation: {self.target_position}' +
-                              f'\nrotation: {self.target_rotation}' )
-            except (tf2_ros.LookupException, 
-                    tf2_ros.ConnectivityException, 
-                    tf2_ros.ExtrapolationException,
-                    tf2_ros.InvalidArgumentException) as err:
-                rospy.logerr(f'{err}')
-                rate.sleep()
-                continue
-            # calc
-            if self.calc_active:
-                self.calc_IK()
-            # publish
-            self.pub_joint_states()
-            rate.sleep()
-            
-    def ps3_state_callback(self, msg):
-        '''Get calc parameters from /ps3_state'''
-        if msg.header.seq == self.ps3_msg_seq: return
-        else: self.ps3_msg_seq = msg.header.seq
-        rospy.logdebug(f'ps3_state_msg_seq: {self.ps3_msg_seq}')         
+    def handle_ps3_state(self, msg):
+        '''Get calc and gripper states of ps3 controller'''
         self.base_frame  = msg.header.frame_id
         self.calc_active = msg.calc_active
         self.calc_orient = msg.calc_orient 
+        self.gripper     = msg.gripper
+        rospy.logdebug(f'calc active, {self.calc_active}, orient: {self.calc_orient}, gripper: {self.gripper}')
 
-    def calc_IK(self) -> None:
-        '''Inverse kinematic calculation'''
-        # two step calc for more sustainable result: https://github.com/Phylliade/ikpy/wiki/Orientation
-        self.chain_links = self.chain.inverse_kinematics(self.target_position)
-        orientation_matrix = tf_conversions.transformations.quaternion_matrix(self.target_rotation)
-        if self.calc_orient:
-            self.chain_links = self.chain.inverse_kinematics(self.target_position, orientation_matrix[:-1, :-1], orientation_mode='all')
-        # exclude world, base_link and end_effector fixed joints and round for messaging
-        self.joint_angles = np.round(self.chain_links[2:-1],3)
+        # publish in callback because of spin mode
+        self.calc_pos_error()
+        self.pub_marker()
 
-    def pub_joint_states(self) -> None:
-        '''Publishing joints angles to topic "/joint_states"''' 
-        pub = rospy.Publisher('joint_states', JointState, queue_size=1)
-        msg = JointState()
-        msg.header = Header()
-        msg.header.stamp = rospy.Time.now()
+    def pub_marker(self):
+        '''visualization marker publiser, based on transform /target vs /world'''
+        pub = rospy.Publisher("visualization_marker", Marker, queue_size = 1)
+        msg = Marker()
         msg.header.frame_id = self.base_frame
-        msg.name = [f'joint_{i}' for i in range(1,6)]
-        msg.position = self.joint_angles
-        msg.velocity = []
-        msg.effort   = []
+        msg.header.stamp = rospy.Time.now()
+        msg.id = 0
+        try:
+            target_tf = self.tf_buffer.lookup_transform(self.base_frame, 'target', rospy.Time())
+            log_show_transform(target_tf, self.base_frame, 'target', axs='rxyz', log_lvl=rospy.DEBUG)
+        except (tf2_ros.LookupException, 
+                tf2_ros.ConnectivityException, 
+                tf2_ros.ExtrapolationException,
+                tf2_ros.InvalidArgumentException) as err:
+            rospy.logerr(f'{err}')
+        # Set the target marker parameters
+        msg.type = msg.CUBE if self.gripper else msg.SPHERE
+        msg.pose.position = target_tf.transform.translation
+        msg.pose.orientation = target_tf.transform.rotation
+        msg.scale.x = 0.05
+        msg.scale.y = 0.05
+        msg.scale.z = 0.05
+        # color depends on error
+        msg.color.r = 0.0
+        msg.color.g = 0.0
+        msg.color.b = 0.0
+        msg.color.a = 0.7
+        if not self.calc_active: 
+            msg.color.r = 1.0
+            msg.color.g = 1.0
+            msg.color.b = 1.0
+        elif self.pos_error <= self.max_pos_error and self.orient_error <= self.max_orient_error:
+            msg.color.g = 1.0
+        elif self.pos_error <= self.max_pos_error and not self.calc_orient:
+            msg.color.b = 1.0
+        elif self.pos_error <= self.max_pos_error and self.calc_orient > self.max_orient_error:
+            msg.color.r = 1.0
+            msg.color.g = 0.65
+        else:
+            msg.color.r = 1.0
         pub.publish(msg)
+
+    def calc_pos_error(self):
+        '''Calculate position and orientation error from transform /target vs /end_effector'''
+        try:
+            target_tf = self.tf_buffer.lookup_transform('end_effector', 'target', rospy.Time())
+            log_show_transform(target_tf, 'end_effector', 'target', axs='rxyz', log_lvl=rospy.INFO)
+        except (tf2_ros.LookupException, 
+                tf2_ros.ConnectivityException, 
+                tf2_ros.ExtrapolationException,
+                tf2_ros.InvalidArgumentException) as err:
+            rospy.logerr(f'{err}')
+        self.pos_error = np.linalg.norm((target_tf.transform.translation.x,
+                                         target_tf.transform.translation.y,
+                                         target_tf.transform.translation.z))
+        # https://math.stackexchange.com/questions/59629/the-euclidean-norm-r-of-a-rotation
+        target_end_effector_rotation = (target_tf.transform.rotation.x,
+                                        target_tf.transform.rotation.y,
+                                        target_tf.transform.rotation.z,
+                                        target_tf.transform.rotation.w)
+        euler = tf_conversions.transformations.euler_from_quaternion(target_end_effector_rotation, axes='rxyz')
+        self.orient_error = np.linalg.norm(np.degrees(euler))
+        rospy.loginfo(f'pos_error: {np.round(self.pos_error, 3)}, orient_error: {np.round(self.orient_error, 1)}')
 
 
 if __name__ == '__main__':
-    # get path to urdf from launch file
-    # https://answers.ros.org/question/384669/use-arguments-from-roslaunch-in-python/?answer=384696
-    urdf_file = rospy.get_param('/moveo_ikpy/model') 
     try:
-        moveo_ik_pub = MoveoIKPy(urdf_file)
+        TargetMarker()
     except rospy.ROSInterruptException as err:
         rospy.logerr(str(err))
     

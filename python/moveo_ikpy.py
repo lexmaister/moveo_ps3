@@ -20,9 +20,9 @@ def log_show_transform(tf, base_frame: str, moving_frame: str, axs:str = 'sxyz',
                         tf.transform.rotation.z,
                         tf.transform.rotation.w)
     euler = tf_conversions.transformations.euler_from_quaternion(target_rotation, axes=axs)
-    tf_str =    f'tf /{base_frame} /{moving_frame}:'\
-                f'\ntranslation, m: {np.round(target_position, 3)}'\
-                f'\nrotation - euler({axs}), deg): {np.round(np.degrees(euler), 1)}'
+    tf_str = f'tf /{base_frame} /{moving_frame}:'\
+             f'\ntranslation, m: {np.round(target_position, 3)}'\
+             f'\nrotation - euler({axs}), deg): {np.round(np.degrees(euler), 1)}'
     if log_lvl == rospy.INFO:
         rospy.loginfo(tf_str)
     elif log_lvl == rospy.DEBUG:
