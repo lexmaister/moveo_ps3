@@ -64,15 +64,15 @@ class TargetMarker:
         try:
             target_tf = self.tf_buffer.lookup_transform(self.base_frame, 'target', rospy.Time())
             log_show_transform(target_tf, self.base_frame, 'target', axs='rxyz', log_lvl=rospy.DEBUG)
+        # Set the target marker parameters
+            msg.type = msg.CUBE if self.gripper else msg.SPHERE
+            msg.pose.position = target_tf.transform.translation
+            msg.pose.orientation = target_tf.transform.rotation
         except (tf2_ros.LookupException, 
                 tf2_ros.ConnectivityException, 
                 tf2_ros.ExtrapolationException,
                 tf2_ros.InvalidArgumentException) as err:
             rospy.logerr(f'{err}')
-        # Set the target marker parameters
-        msg.type = msg.CUBE if self.gripper else msg.SPHERE
-        msg.pose.position = target_tf.transform.translation
-        msg.pose.orientation = target_tf.transform.rotation
         msg.scale.x = 0.05
         msg.scale.y = 0.05
         msg.scale.z = 0.05
@@ -101,22 +101,22 @@ class TargetMarker:
         try:
             target_tf = self.tf_buffer.lookup_transform('end_effector', 'target', rospy.Time())
             log_show_transform(target_tf, 'end_effector', 'target', axs='rxyz', log_lvl=rospy.INFO)
+            self.pos_error = np.linalg.norm((target_tf.transform.translation.x,
+                                             target_tf.transform.translation.y,
+                                             target_tf.transform.translation.z))
+            # https://math.stackexchange.com/questions/59629/the-euclidean-norm-r-of-a-rotation
+            target_end_effector_rotation = (target_tf.transform.rotation.x,
+                                            target_tf.transform.rotation.y,
+                                            target_tf.transform.rotation.z,
+                                            target_tf.transform.rotation.w)
+            euler = tf_conversions.transformations.euler_from_quaternion(target_end_effector_rotation, axes='rxyz')
+            self.orient_error = np.linalg.norm(np.degrees(euler))
+            rospy.logdebug(f'pos_error: {np.round(self.pos_error, 3)}, orient_error: {np.round(self.orient_error, 1)}')
         except (tf2_ros.LookupException, 
                 tf2_ros.ConnectivityException, 
                 tf2_ros.ExtrapolationException,
                 tf2_ros.InvalidArgumentException) as err:
             rospy.logerr(f'{err}')
-        self.pos_error = np.linalg.norm((target_tf.transform.translation.x,
-                                         target_tf.transform.translation.y,
-                                         target_tf.transform.translation.z))
-        # https://math.stackexchange.com/questions/59629/the-euclidean-norm-r-of-a-rotation
-        target_end_effector_rotation = (target_tf.transform.rotation.x,
-                                        target_tf.transform.rotation.y,
-                                        target_tf.transform.rotation.z,
-                                        target_tf.transform.rotation.w)
-        euler = tf_conversions.transformations.euler_from_quaternion(target_end_effector_rotation, axes='rxyz')
-        self.orient_error = np.linalg.norm(np.degrees(euler))
-        rospy.loginfo(f'pos_error: {np.round(self.pos_error, 3)}, orient_error: {np.round(self.orient_error, 1)}')
 
 
 if __name__ == '__main__':

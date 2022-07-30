@@ -50,7 +50,7 @@ class MoveoIKPy:
         self.base_frame         = ''
         self.chain = ikpy.chain.Chain.from_urdf_file(urdf, base_elements = ['world'])
         # full 8 chain links (aka urdf joints)
-        self.chain_links        = []
+        self.chain_links        = [0] * 8
         # track ps3 messages counter 
         self.ps3_msg_seq        = 0
         # start node
@@ -103,12 +103,16 @@ class MoveoIKPy:
     def calc_IK(self) -> None:
         '''Inverse kinematic calculation'''
         # two step calc for more sustainable result: https://github.com/Phylliade/ikpy/wiki/Orientation
-        self.chain_links = self.chain.inverse_kinematics(self.target_position)
-        orientation_matrix = tf_conversions.transformations.quaternion_matrix(self.target_rotation)
+        init_pos = self.chain_links
         if self.calc_orient:
-            self.chain_links = self.chain.inverse_kinematics(self.target_position, orientation_matrix[:-1, :-1], orientation_mode='all')
+            orientation_matrix = tf_conversions.transformations.quaternion_matrix(self.target_rotation)
+            self.chain_links = self.chain.inverse_kinematics(self.target_position, orientation_matrix[:-1, :-1], 
+                                                             orientation_mode='all', initial_position=init_pos)
+        else:
+            self.chain_links = self.chain.inverse_kinematics(self.target_position, initial_position=init_pos)
+
         # exclude world, base_link and end_effector fixed joints and round for messaging
-        self.joint_angles = np.round(self.chain_links[2:-1],3)
+        self.joint_angles = np.round(self.chain_links[2:-1],4)
 
     def pub_joint_states(self) -> None:
         '''Publishing joints angles to topic "/joint_states"''' 
