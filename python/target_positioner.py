@@ -6,7 +6,7 @@ from moveo_ps3.msg import PS3State, TargetPose
 
 
 class TargetPositioner:
-    '''Class for calc target pose - position and orientation, works in loop mode
+    '''Class for calc target pose - position and orientation, works in spin mode
 
     Subscriber:
         * /ps3_state
@@ -47,6 +47,8 @@ class TargetPositioner:
         speed_pos, speed_orient = msg.speed
         self.position    = list(map(lambda x, y: x + y*speed_pos,    self.position,    msg.change_position))
         self.orientation = list(map(lambda x, y: x + y*speed_orient, self.orientation, msg.change_orientation))
+        
+        self.pub_target_pose()
 
     def pub_target_pose(self) -> None:
         '''Publishing to topic /target_pose'''
@@ -66,13 +68,8 @@ class TargetPositioner:
         # init pose
         self.reset_pose(pos=True, orient=True)
         rospy.init_node('target_positioner', log_level=rospy.INFO)
-        rate = rospy.Rate(10) #10 Hz
-        while not rospy.is_shutdown():
-            rate.sleep()
-            #subscribe
-            rospy.Subscriber("ps3_state", PS3State, self.ps3_state_callback, queue_size=1)
-            # publish
-            self.pub_target_pose()
+        rospy.Subscriber("ps3_state", PS3State, self.ps3_state_callback, queue_size=1)
+        rospy.spin()
                 
 
 if __name__ == '__main__':
