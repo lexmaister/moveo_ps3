@@ -21,8 +21,7 @@ class TargetPositioner:
         # euler angles, degrees
         self.orientation  = [0, 0, 0]
         self.base_frame   = ''
-        # msg counters
-        self.in_msg_seq   = 0
+        # msg counter
         self.out_msg_seq  = 0
         # start node
         self.run()
@@ -33,11 +32,7 @@ class TargetPositioner:
         if orient: self.orientation = [0., 0., 0.]
         
     def ps3_state_callback(self, msg) -> None:
-        '''PS3 state messages handler'''
-        if msg.header.seq == self.in_msg_seq: return
-        else: self.in_msg_seq = msg.header.seq
-        rospy.logdebug(f'ps3_state_msg_seq: {self.in_msg_seq}') 
-        
+        '''PS3 state messages handler'''    
         self.base_frame = msg.header.frame_id
 
         if any(msg.reset):
