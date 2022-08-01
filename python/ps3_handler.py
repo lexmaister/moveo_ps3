@@ -7,7 +7,7 @@ from moveo_ps3.msg import PS3State
 
 
 class PS3Handler:
-    '''Class for handlind joystic messages, works in loop mode
+    '''Class for handling joystick messages, works in loop mode
 
     Subscriber:
         * /joy
