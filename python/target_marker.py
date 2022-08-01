@@ -12,7 +12,7 @@ import tf2_ros
 
 class TargetMarker:
     '''
-    Class for publishing target visualisation marker depending transform error /target vs /end_effector, 
+    Class for publishing target visualization marker depending transform error /target vs /end_effector, 
     works in spin mode
 
     Subscriber:

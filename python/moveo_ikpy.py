@@ -102,7 +102,6 @@ class MoveoIKPy:
 
     def calc_IK(self) -> None:
         '''Inverse kinematic calculation'''
-        # two step calc for more sustainable result: https://github.com/Phylliade/ikpy/wiki/Orientation
         init_pos = self.chain_links
         if self.calc_orient:
             orientation_matrix = tf_conversions.transformations.quaternion_matrix(self.target_rotation)
