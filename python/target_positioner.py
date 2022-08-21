@@ -20,8 +20,10 @@ class TargetPositioner:
     def __init__(self) -> None:
         # meters
         self.position     = [0, 0, 0]
-        # euler angles, degrees
+        # euler angles, degrees - for inner calc
         self.orientation  = [0, 0, 0]
+        # quaternion for publication
+        self.quaternion   = [0, 0, 0, 1]
         self.base_frame   = ''
         # msg counter
         self.out_msg_seq  = 0
@@ -42,13 +44,25 @@ class TargetPositioner:
             return
 
         speed_pos, speed_orient = msg.speed
-        self.position    = list(map(lambda x, y: x + y*speed_pos,    self.position,    msg.change_position))
-        # self.orientation = list(map(lambda x, y: x + y*speed_orient, self.orientation, msg.change_orientation))
-        R_curr = tf_trans.euler_matrix(*np.radians(self.orientation))
-        euler = list(map(lambda x: x*speed_orient, msg.change_orientation))
-        R = tf_trans.euler_matrix(*np.radians(euler))
-        R_res =tf_trans.concatenate_matrices(R_curr, R)
-        self.orientation = np.degrees(tf_trans.euler_from_matrix(R_res))
+        self.position = list(map(lambda x, y: x + y*speed_pos, self.position, msg.change_position))
+        
+        # Rotation - multiplication of current and received
+        euler_rot = list(map(lambda x: x*speed_orient, msg.change_orientation))
+        
+        # http://docs.ros.org/en/jade/api/tf/html/python/transformations.html
+        # Rotation matrices - https://www.youtube.com/watch?v=wg9bI8-Qx2Q
+        # R_curr = tf_trans.euler_matrix(*np.radians(self.orientation))
+        # R_rot = tf_trans.euler_matrix(*np.radians(euler_rot))
+        # R_res =tf_trans.concatenate_matrices(R_curr, R_rot)
+        # self.orientation = np.degrees(tf_trans.euler_from_matrix(R_res))
+        
+        # http://wiki.ros.org/tf2/Tutorials/Quaternions
+        q_curr = tf_trans.quaternion_from_euler(*np.radians(self.orientation))
+        q_rot = tf_trans.quaternion_from_euler(*np.radians(euler_rot))
+        # spherical rotation, if multiply(q_rot, q_curr) - rotation about glogal frame axis
+        q_res = tf_trans.quaternion_multiply(q_curr, q_rot)
+        self.orientation = np.degrees(tf_trans.euler_from_quaternion(q_res))
+        self.quaternion = q_res
 
         self.pub_target_pose()
 
@@ -62,7 +76,7 @@ class TargetPositioner:
         msg.header.stamp    = rospy.Time.now()
         msg.header.frame_id = self.base_frame
         msg.position        = self.position[:]
-        msg.orientation     = self.orientation[:]
+        msg.quaternion      = self.quaternion[:]
         pub.publish(msg)
 
     def run(self) -> None:
