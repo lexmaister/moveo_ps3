@@ -30,7 +30,7 @@ def handle_target_state(msg):
     # http://docs.ros.org/en/jade/api/tf/html/python/transformations.html
     # https://www.youtube.com/watch?v=wg9bI8-Qx2Q
     euler = tuple(map(math.radians, msg.orientation))
-    q = tf_conversions.transformations.quaternion_from_euler(euler[0], euler[1], euler[2], 'rxyz')
+    q = tf_conversions.transformations.quaternion_from_euler(euler[0], euler[1], euler[2], 'sxyz')
     tf.transform.rotation.x = q[0]
     tf.transform.rotation.y = q[1]
     tf.transform.rotation.z = q[2]

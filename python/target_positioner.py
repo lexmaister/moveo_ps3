@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import rospy
+from tf_conversions import transformations as tf_trans
+import numpy as np
 from std_msgs.msg import Header
 from moveo_ps3.msg import PS3State, TargetPose
 
@@ -41,8 +43,13 @@ class TargetPositioner:
 
         speed_pos, speed_orient = msg.speed
         self.position    = list(map(lambda x, y: x + y*speed_pos,    self.position,    msg.change_position))
-        self.orientation = list(map(lambda x, y: x + y*speed_orient, self.orientation, msg.change_orientation))
-        
+        # self.orientation = list(map(lambda x, y: x + y*speed_orient, self.orientation, msg.change_orientation))
+        R_curr = tf_trans.euler_matrix(*np.radians(self.orientation))
+        euler = list(map(lambda x: x*speed_orient, msg.change_orientation))
+        R = tf_trans.euler_matrix(*np.radians(euler))
+        R_res =tf_trans.concatenate_matrices(R_curr, R)
+        self.orientation = np.degrees(tf_trans.euler_from_matrix(R_res))
+
         self.pub_target_pose()
 
     def pub_target_pose(self) -> None:
