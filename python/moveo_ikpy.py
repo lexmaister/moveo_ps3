@@ -24,7 +24,8 @@ def log_show_transform(tf, base_frame: str, moving_frame: str, axs:str = 'sxyz',
              f'\ntranslation, m: {np.round(target_position, 3)}'\
              f'\nrotation - euler({axs}), deg): {np.round(np.degrees(euler), 1)}'
     if log_lvl == rospy.INFO:
-        rospy.loginfo(tf_str)
+        # rospy.loginfo(tf_str)
+        pass
     elif log_lvl == rospy.DEBUG:
         rospy.logdebug(tf_str)
 
@@ -63,7 +64,8 @@ class MoveoIKPy:
         tf_buffer   = tf2_ros.Buffer()
         tf2_ros.TransformListener(tf_buffer)
 
-        rate = rospy.Rate(10) #10 Hz
+        publish_rate = rospy.get_param('joint_states_publish_rate', 10.0) #10 Hz by default
+        rate = rospy.Rate(publish_rate) 
         while not rospy.is_shutdown():
             #subscribe
             rospy.Subscriber('ps3_state', PS3State, self.ps3_state_callback, queue_size=1)

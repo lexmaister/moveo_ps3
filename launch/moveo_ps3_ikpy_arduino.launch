@@ -1,0 +1,27 @@
+<launch>
+
+    <arg name="model" default="$(find moveo_ps3)/urdf/moveo_ps3_extended.urdf"/>
+    <arg name="gui" default="true" />
+    <arg name="rvizconfig" default="$(find moveo_ps3)/rviz/urdf_extended.rviz" />
+    <arg name="serial_port" default="/dev/ttyACM0" />
+
+    <param name="robot_description" command="cat $(find moveo_ps3)/urdf/moveo_ps3_extended.urdf" />
+    <param name="use_gui" value="$(arg gui)"/>
+    <param name="ps3_state_publish_rate" type="double" value="10.0" />
+    <param name="joint_states_publish_rate" type="double" value="1.0" />
+
+    <node name="joy"                    pkg="joy"       type="joy_node"/>
+    <node name="ps3_handler"            pkg="moveo_ps3" type="ps3_handler.py" output="screen" />
+    <node name="target_positioner"      pkg="moveo_ps3" type="target_positioner.py" output="screen" />
+    <node name="target_tf2_publisher"   pkg="moveo_ps3" type="target_tf2_publisher.py" output="screen"/>
+    <node name="target_marker"          pkg="moveo_ps3" type="target_marker.py" output="screen"/>    
+    <node name="moveo_ikpy"             pkg="moveo_ps3" type="moveo_ikpy.py" output="screen">
+        <param name="model" value="$(arg model)" />
+    </node>
+    <node name="serial_node"            pkg="rosserial_python" type="serial_node.py" output="screen">
+        <param name="port" value="$(arg serial_port)" />
+    </node> 
+    <node name="robot_state_publisher"  pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="rviz"                   pkg="rviz"      type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+</launch>

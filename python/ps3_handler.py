@@ -105,7 +105,8 @@ class PS3Handler:
         # set minimum speed
         self.change_speed(increase=True)
         rospy.init_node('ps3_handler', log_level=rospy.INFO)
-        rate = rospy.Rate(10) #10 Hz
+        publish_rate = rospy.get_param('ps3_state_publish_rate', 10.0) #10 Hz by default
+        rate = rospy.Rate(publish_rate) 
         while not rospy.is_shutdown():
             rate.sleep()
             #subscribe
